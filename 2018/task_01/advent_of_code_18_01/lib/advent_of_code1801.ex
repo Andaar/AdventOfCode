@@ -31,6 +31,35 @@ defmodule AdventOfCode1801 do
     :error
   end
 
+  def second_occurrence({:ok, list}, acc \\ {:next, 0, MapSet.new([0])}) when is_list(list) do
+    result = second_occurrence_helper(list, acc)
+
+    case result do
+      {:next, _, _} ->
+        second_occurrence({:ok, list}, result)
+      {:ok, result} ->
+        result
+    end
+  end
+
+  defp second_occurrence_helper(list, tuple_acc) when is_list(list) do
+    Enum.reduce_while(list, tuple_acc, fn(number, acc) ->
+      {_, last, map_set} = acc
+      sum = last + return_integer(number)
+
+      if (!MapSet.member?(map_set, sum)), do: {:cont, {:next, sum, MapSet.put(map_set, sum)}},
+      else: {:halt, {:ok, sum}}
+    end)
+  end
+
+  defp return_integer(number) when is_integer(number) do
+    number
+  end
+
+  defp return_integer(number) do
+    String.to_integer(number)
+  end
+
   defp is_expected_number(data) do
     case String.match?(data, ~r/^[+-][0-9]*$/) do
       true -> :ok
